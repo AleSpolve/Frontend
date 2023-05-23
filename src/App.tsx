@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.js';
+
 
 const data = [
   { name: "Anom", age: 19, gender: "Male" },
@@ -14,20 +17,35 @@ function App() {
   const [name, setName] = useState('');
   const [gender, setGender] = useState('');
   const [age, setAge] = useState('');
+  const [studenteSelezionato, setStudenteSelezionato]=useState(null);
   
 
   function elimina(el: string) {
-
-    setStudents(students.filter(obj => obj.name !== el));
+    setStudents(students.filter(obj => obj.name != el));
   }
 
   function aggiungi() {
-
-    students.push({ name: name, age: parseInt(age), gender: gender });
-    setStudents(students);
+    if (studenteSelezionato) {
+      const aggiornaStudenti = students.map((student) => {
+        if (student == studenteSelezionato) {
+          return {
+            name: name,
+            age: parseInt(age),
+            gender: gender
+          };
+        }
+        return student;
+      });
+  
+      setStudents(aggiornaStudenti);
+      setStudenteSelezionato(null);
+    } else {
+      students.push({ name: name, age: parseInt(age), gender: gender });
+      setStudents(students);
+    }
+  
     bottone();
   }
-
   
   function bottone() {
     if (showForm) {
@@ -39,7 +57,8 @@ function App() {
   }
 
   function modifica(student:any) {
-  bottone();
+    setStudenteSelezionato(student);
+    bottone();
   }
   
   
@@ -58,17 +77,20 @@ function App() {
                 <td>{val.name}</td>
                 <td>{val.age}</td>
                 <td>{val.gender}</td>
-                <td><button onClick={() => elimina(val.name)}>ELIMINA</button></td>
-                <td><button onClick={() => modifica(val)}>MODIFICA</button></td>
+                <td><button className='btn btn-primary' onClick={() => elimina(val.name)}>ELIMINA</button></td>
+                <td><button className='btn btn-primary' onClick={() => modifica(val)}>MODIFICA</button></td>
               </tr>
             )
           })}
         </table>
         <br />
         
-          <button value="inserisci" onClick={() => bottone()}>Inserisci</button>
+          <button className='btn btn-primary' value="inserisci" onClick={() => bottone()}>Inserisci</button>
+
         {showForm &&
+        
         <form>
+          <br/>
           <input type="text" name="name" onChange={(e) =>setName(e.target.value)}/>
           <br />
           <br />
@@ -81,7 +103,7 @@ function App() {
           </select>
           <br />
           <br />
-          <input type="submit" value="salva" name="salva" onClick={()=> aggiungi()}/>
+          <input className='btn btn-primary' type="submit" value="salva" name="salva" onClick={()=> aggiungi()}/>
 
         </form>
         }
