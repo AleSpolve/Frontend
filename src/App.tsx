@@ -1,37 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
-
-
-const data = [
-  { name: "Anom", age: 19, gender: "Male" },
-  { name: "Megha", age: 19, gender: "Female" },
-  { name: "Subham", age: 25, gender: "Male" },
-]
+import {Table} from 'react-bootstrap';
 
 function App() {
-  const [students, setStudents] = useState(data);
+  const [students, setStudents] = useState([{id: 0, name: ''}]);
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState('');
-  const [gender, setGender] = useState('');
-  const [age, setAge] = useState('');
+  const [id, setGender] = useState('');
   const [studenteSelezionato, setStudenteSelezionato]=useState(null);
   
+  useEffect(() => {
+    fetch(`http://localhost:8080/rest/studenti`)
+      .then((response) => response.json())
+      .then((actualData) =>{
+        setStudents(actualData.records);
+      });
+  }, []);
 
-  function elimina(el: string) {
-    setStudents(students.filter(obj => obj.name != el));
+  function elimina(el: number) {
+    setStudents(students.filter(obj => obj.id != el));
   }
 
   function aggiungi() {
     if (studenteSelezionato) {
-      const aggiornaStudenti = students.map((student) => {
+      const aggiornaStudenti = students.length <= 0 ? [] : students.map((student) => {
         if (student == studenteSelezionato) {
           return {
-            name: name,
-            age: parseInt(age),
-            gender: gender
+            id: parseInt(id),
+            name: name
           };
         }
         return student;
@@ -40,7 +39,7 @@ function App() {
       setStudents(aggiornaStudenti);
       setStudenteSelezionato(null);
     } else {
-      students.push({ name: name, age: parseInt(age), gender: gender });
+      students.push({id: parseInt(id), name:name});
       setStudents(students);
     }
   
@@ -65,24 +64,28 @@ function App() {
   return (
     <div className="App">
       <center>
-        <table>
+        <Table>
+          <thead>
           <tr>
-            <th>Name</th>
-            <th>Age</th>
-            <th>Gender</th>
+            <th>id</th>
+            <th>nome</th>
           </tr>
-          {students.map((val, key) => {
+          </thead>
+          <tbody>
+          {students && students.length > 0 && students.map((val, key) => {
             return (
               <tr key={key}>
+                <td>{val.id}</td>
                 <td>{val.name}</td>
-                <td>{val.age}</td>
-                <td>{val.gender}</td>
-                <td><button className='btn btn-primary' onClick={() => elimina(val.name)}>ELIMINA</button></td>
+                <td><button className='btn btn-primary' onClick={() => elimina(val.id)}>ELIMINA</button></td>
                 <td><button className='btn btn-primary' onClick={() => modifica(val)}>MODIFICA</button></td>
               </tr>
+            
             )
+            
           })}
-        </table>
+          </tbody>
+        </Table>
         <br />
         
           <button className='btn btn-primary' value="inserisci" onClick={() => bottone()}>Inserisci</button>
@@ -94,13 +97,7 @@ function App() {
           <input type="text" name="name" onChange={(e) =>setName(e.target.value)}/>
           <br />
           <br />
-          <input type="number" name="age" onChange={(e) =>setAge(e.target.value)}/>
-          <br />
-          <br />
-          <select name="gender" onChange={(e) => setGender(e.target.value)}>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-          </select>
+          <input type="number" name="id" onChange={(e) =>setGender(e.target.value)}/>
           <br />
           <br />
           <input className='btn btn-primary' type="submit" value="salva" name="salva" onClick={()=> aggiungi()}/>
